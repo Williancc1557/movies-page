@@ -4,8 +4,9 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const page = url.searchParams.get("page") || "1"; // Padrão para 1 se não especificado
-  const title = url.searchParams.get("title") || ""; // Padrão para vazio se não especificado
-  const genre = url.searchParams.get("genre") || ""; // Padrão para vazio se não especificado
+  const title = url.searchParams.get("title") || "";
+  const genre = url.searchParams.get("genre") || "";
+  const year = url.searchParams.get("year") || "";
 
   const queryParams = new URLSearchParams();
   queryParams.append("page", page);
@@ -15,6 +16,10 @@ export async function GET(request: NextRequest) {
 
   if (genre) {
     queryParams.append("genre", genre);
+  }
+
+  if (year) {
+    queryParams.append("year", year);
   }
 
   const response = await fetch(

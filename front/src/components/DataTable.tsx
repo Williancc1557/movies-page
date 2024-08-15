@@ -122,6 +122,7 @@ export function DataTableDemo({ data }: any) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [title, setTitle] = React.useState("");
   const [genre, setGenre] = React.useState("");
+  const [year, setYear] = React.useState("");
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -150,7 +151,7 @@ export function DataTableDemo({ data }: any) {
     },
   });
 
-  const fetchMovies = async (title: string, genre: string) => {
+  const fetchMovies = async (title: string, genre: string, year: string) => {
     const queryParams = new URLSearchParams();
 
     if (title) {
@@ -159,7 +160,10 @@ export function DataTableDemo({ data }: any) {
     if (genre) {
       queryParams.append("genre", genre);
     }
-    if (!title && !genre) {
+    if (year) {
+      queryParams.append("year", year);
+    }
+    if (!title && !genre && !year) {
       queryParams.append("page", "1");
     }
 
@@ -171,19 +175,38 @@ export function DataTableDemo({ data }: any) {
     );
 
     const filteredMovies = await response.json();
+    const storageMovies = localStorage.getItem("movies");
+    filteredMovies.results = filteredMovies.results.map((mo: any) => {
+      if (!storageMovies) return mo;
+
+      const existingMovie = JSON.parse(storageMovies).find(
+        (m: any) => m.id === mo.id
+      );
+      if (existingMovie) {
+        return existingMovie;
+      }
+
+      return mo;
+    });
     setMovies(filteredMovies);
   };
 
   const titleFilterOnChange = (value: any) => {
     const title = value.target.value;
     setTitle(title);
-    fetchMovies(title, genre);
+    fetchMovies(title, genre, year);
   };
 
   const genreFilterOnChange = (value: any) => {
     const genre = value.target.value;
     setGenre(genre);
-    fetchMovies(title, genre);
+    fetchMovies(title, genre, year);
+  };
+
+  const yearFilterOnChange = (value: any) => {
+    const year = value.target.value;
+    setYear(year);
+    fetchMovies(title, genre, year);
   };
 
   return (
@@ -201,6 +224,13 @@ export function DataTableDemo({ data }: any) {
             value={genre}
             placeholder="genre"
             onChange={genreFilterOnChange}
+          />
+          <Input
+            id="year"
+            value={year}
+            type="number"
+            placeholder="year"
+            onChange={yearFilterOnChange}
           />
         </div>
         <div className="py-4">
