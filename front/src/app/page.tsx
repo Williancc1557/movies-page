@@ -25,7 +25,6 @@ import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -35,6 +34,7 @@ import { Edit, SearchXIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CircularProgress, Skeleton } from "@mui/material";
 import { useGlobalChatsContext } from "@/context/globalChatContext";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Home() {
   const { movies, setMovies } = useGlobalChatsContext();
@@ -131,8 +131,9 @@ export function DialogDemo({ movieId }: any) {
   const movie = movies?.results?.find((item: any) => item.id === movieId);
   const [title, setTitle] = useState(movie?.originalTitleText?.text);
   const [year, setYear] = useState(movie.releaseYear.year);
-  const [endYear, setEndYear] = useState(movie.releaseYear.endYear);
   const [open, setOpen] = useState(false);
+  const [isSeries, setIsSeries] = useState(movie.titleType.isSeries);
+  const [isEpisode, setIsEpisode] = useState(movie.titleType.isEpisode);
 
   const submit = () => {
     const index = movies?.results?.findIndex((el: any) => el.id == movieId);
@@ -145,7 +146,11 @@ export function DialogDemo({ movieId }: any) {
             ? {
                 ...movie,
                 originalTitleText: { ...movie.originalTitleText, text: title },
-                releaseYear: { ...movie.releaseYear, year, endYear },
+                releaseYear: { ...movie.releaseYear, year },
+                titleType: {
+                  isEpisode,
+                  isSeries,
+                },
               }
             : movie
         ),
@@ -198,14 +203,41 @@ export function DialogDemo({ movieId }: any) {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="year" className="text-right">
-              Year
+              Is series
             </Label>
-            <Input
-              id="year"
-              className="col-span-3"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-            />
+            <RadioGroup
+              value={isSeries ? "yes" : "no"}
+              onValueChange={(value: string) => setIsSeries(value === "yes")}
+              className="flex"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="r1" />
+                <Label htmlFor="r1">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="r2" />
+                <Label htmlFor="r2">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="year" className="text-right">
+              Is episode
+            </Label>
+            <RadioGroup
+              value={isEpisode ? "yes" : "no"}
+              onValueChange={(value: string) => setIsEpisode(value === "yes")}
+              className="flex"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="r1" />
+                <Label htmlFor="r1">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="r2" />
+                <Label htmlFor="r2">No</Label>
+              </div>
+            </RadioGroup>
           </div>
         </div>
         <DialogFooter>

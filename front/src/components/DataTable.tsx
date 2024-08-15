@@ -106,7 +106,7 @@ export const columns: ColumnDef<any>[] = [
     header: "Is episode",
     cell: ({ row }) => (
       <div className="capitalize">
-        {row.original.titleType.isSeries ? `Yes` : "No"}
+        {row.original.titleType.isEpisode ? `Yes` : "No"}
       </div>
     ),
   },
