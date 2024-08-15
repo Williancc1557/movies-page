@@ -140,20 +140,16 @@ export function DataTableDemo({ data }: any) {
   });
 
   const titleFilterOnChange = async (value: any) => {
-    setTitle(value.target.value);
-    if (value.target.value === "") {
-      const response = await fetch(`/api/get-all-chats?page=1`, {
-        method: "GET",
-      });
-      const allMovies = await response.json();
-      setMovies(allMovies);
-    } else {
-      const response = await fetch(
-        `/api/find-title?title=${value.target.value}`
-      );
-      const filteredMovies = await response.json();
-      setMovies(filteredMovies);
-    }
+    const title = value.target.value;
+    setTitle(title);
+    const queryParams = title ? `?title=${title}` : `?page=1`;
+
+    const response = await fetch(`/api/get-all-chats${queryParams}`, {
+      method: "GET",
+    });
+
+    const filteredMovies = await response.json();
+    setMovies(filteredMovies);
   };
 
   return (

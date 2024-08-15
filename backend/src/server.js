@@ -32,31 +32,58 @@ const pageSize = 10;
 
 app.get("/movies/filter", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
+  const titleQuery = req.query.title ? req.query.title.toLowerCase() : "";
+  const genreQuery = req.query.genre ? req.query.genre.toLowerCase() : "";
+
+  const filteredMovies = movies.filter((movie) => {
+    const matchesTitle = movie.originalTitleText.text
+      .toLowerCase()
+      .includes(titleQuery);
+    const matchesGenre = genreQuery
+      ? movie.genres.some((genre) => genre.toLowerCase().includes(genreQuery))
+      : true;
+
+    return matchesTitle && matchesGenre;
+  });
+
+  const totalResults = filteredMovies.length;
+  const totalPages = Math.ceil(totalResults / pageSize);
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = page * pageSize;
 
-  const paginatedMovies = movies.slice(startIndex, endIndex);
+  const paginatedMovies = filteredMovies.slice(startIndex, endIndex);
 
   res.json({
     page: page,
-    totalResults: movies.length,
-    totalPages: Math.ceil(movies.length / pageSize),
+    totalResults: totalResults,
+    totalPages: totalPages,
     results: paginatedMovies,
   });
 });
 
 app.get("/movies/title/search/:title", async (req, res) => {
   const titleQuery = req.params.title.toLowerCase();
+  const page = parseInt(req.query.page) || 1;
 
   const filteredMovies = movies.filter((movie) =>
     movie.originalTitleText.text.toLowerCase().includes(titleQuery)
   );
 
+  const totalResults = filteredMovies.length;
+  const totalPages = Math.ceil(totalResults / pageSize);
+
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = page * pageSize;
+
+  const paginatedMovies = filteredMovies.slice(startIndex, endIndex);
+
   res.json({
     query: titleQuery,
-    totalResults: filteredMovies.length,
-    results: filteredMovies,
+    page: page,
+    totalResults: totalResults,
+    totalPages: totalPages,
+    results: paginatedMovies,
   });
 });
 
