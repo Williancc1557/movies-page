@@ -4,14 +4,6 @@ import { DataTableDemo } from "@/components/DataTable";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -30,7 +22,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Edit, SearchXIcon } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CircularProgress, Skeleton } from "@mui/material";
 import { useGlobalChatsContext } from "@/context/globalChatContext";
@@ -48,7 +40,22 @@ export default function Home() {
         method: "GET",
       });
 
-      setMovies(await response.json());
+      const movies = await response.json();
+      const storageMovies = localStorage.getItem("movies");
+      movies.results = movies.results.map((mo: any) => {
+        if (!storageMovies) return mo;
+
+        const existingMovie = JSON.parse(storageMovies).find(
+          (m: any) => m.id === mo.id
+        );
+        if (existingMovie) {
+          return existingMovie;
+        }
+
+        return mo;
+      });
+
+      setMovies(movies);
       setLoading(false);
     };
 
@@ -68,8 +75,6 @@ export default function Home() {
   const handlePageSelect = (pageNumber: number) => {
     setPage(pageNumber);
   };
-
-  console.log(movies);
 
   return (
     <main className="flex flex-col h-screen">
@@ -138,26 +143,46 @@ export function DialogDemo({ movieId }: any) {
   const submit = () => {
     const index = movies?.results?.findIndex((el: any) => el.id == movieId);
 
-    if (index > -1) {
-      const updatedMovies = {
-        ...movies,
-        results: movies.results.map((movie: any, i: number) =>
-          i === index
-            ? {
-                ...movie,
-                originalTitleText: { ...movie.originalTitleText, text: title },
-                releaseYear: { ...movie.releaseYear, year },
-                titleType: {
-                  isEpisode,
-                  isSeries,
-                },
-              }
-            : movie
-        ),
-      };
+    if (index == -1) return setOpen(false);
 
-      setMovies(updatedMovies);
-    }
+    const updatedMovies = {
+      ...movies,
+      results: movies.results.map((movie: any, i: number) => {
+        if (i === index) {
+          const updatedValue = {
+            ...movie,
+            originalTitleText: { ...movie.originalTitleText, text: title },
+            releaseYear: { ...movie.releaseYear, year },
+            titleType: {
+              isEpisode,
+              isSeries,
+            },
+          };
+          const moviesStore = localStorage.getItem("movies");
+          if (moviesStore) {
+            const moviesStoreJson = JSON.parse(moviesStore);
+            const i = moviesStoreJson.findIndex((v: any) => v.id == movie.id);
+
+            if (i == -1) {
+              moviesStoreJson.push(updatedValue);
+            } else {
+              moviesStoreJson[i] = updatedValue;
+            }
+
+            localStorage.setItem("movies", JSON.stringify(moviesStoreJson));
+            return updatedValue;
+          }
+
+          localStorage.setItem("movies", JSON.stringify([updatedValue]));
+
+          return updatedValue;
+        }
+
+        return movie;
+      }),
+    };
+
+    setMovies(updatedMovies);
 
     setOpen(false);
   };
