@@ -69,6 +69,15 @@ export const columns: ColumnDef<any>[] = [
     cell: ({ row }) => <div>{row.original.originalTitleText.text}</div>,
   },
   {
+    accessorKey: "genres",
+    header: "Genre",
+    cell: ({ row }) => (
+      <div>
+        {(row.getValue("genres") as any)?.map((value: any) => value + ", ")}
+      </div>
+    ),
+  },
+  {
     accessorKey: "releaseYear.year",
     header: ({ column }) => (
       <Button
@@ -112,10 +121,12 @@ export const columns: ColumnDef<any>[] = [
 export function DataTableDemo({ data }: any) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [title, setTitle] = React.useState("");
+  const [genre, setGenre] = React.useState("");
+
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const { movies, setMovies } = useGlobalChatsContext();
+  const { setMovies } = useGlobalChatsContext();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -139,17 +150,40 @@ export function DataTableDemo({ data }: any) {
     },
   });
 
-  const titleFilterOnChange = async (value: any) => {
-    const title = value.target.value;
-    setTitle(title);
-    const queryParams = title ? `?title=${title}` : `?page=1`;
+  const fetchMovies = async (title: string, genre: string) => {
+    const queryParams = new URLSearchParams();
 
-    const response = await fetch(`/api/get-all-chats${queryParams}`, {
-      method: "GET",
-    });
+    if (title) {
+      queryParams.append("title", title);
+    }
+    if (genre) {
+      queryParams.append("genre", genre);
+    }
+    if (!title && !genre) {
+      queryParams.append("page", "1");
+    }
+
+    const response = await fetch(
+      `/api/get-all-chats?${queryParams.toString()}`,
+      {
+        method: "GET",
+      }
+    );
 
     const filteredMovies = await response.json();
     setMovies(filteredMovies);
+  };
+
+  const titleFilterOnChange = (value: any) => {
+    const title = value.target.value;
+    setTitle(title);
+    fetchMovies(title, genre);
+  };
+
+  const genreFilterOnChange = (value: any) => {
+    const genre = value.target.value;
+    setGenre(genre);
+    fetchMovies(title, genre);
   };
 
   return (
@@ -161,6 +195,12 @@ export function DataTableDemo({ data }: any) {
             value={title}
             placeholder="Title"
             onChange={titleFilterOnChange}
+          />
+          <Input
+            id="genre"
+            value={genre}
+            placeholder="genre"
+            onChange={genreFilterOnChange}
           />
         </div>
         <div className="py-4">

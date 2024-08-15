@@ -25,6 +25,7 @@ axios
         isSeries: false,
         isEpisode: false,
       },
+      genres: data.genre,
     }));
   });
 
