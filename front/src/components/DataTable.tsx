@@ -153,13 +153,14 @@ export function DataTableDemo({ data }: any) {
   return (
     <div className="w-full mx-2">
       <div className="flex justify-between items-center">
-        <div>
+        <div className="flex gap-5">
           <Input
             id="title"
             value={""}
             placeholder="Title"
             // onChange={(value) => setTitle(value.target.value)}
           />
+          <Button type="submit">Search</Button>
         </div>
         <div className="py-4">
           <DropdownMenu>
