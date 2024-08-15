@@ -3,6 +3,7 @@
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -35,13 +36,14 @@ export default function Home() {
               {
                 movies?.results?.map((movie: any) => (
                   <div key={movie.id}>
-                    <Card className="h-72">
+                    <Card className="h-60">
                       <CardHeader>
                         <CardTitle>{movie.originalTitleText.text}</CardTitle>
-                        <CardDescription>Card Description</CardDescription>
+                        <CardDescription>{movie.releaseYear.year}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p>Card Content</p>
+                        <p>Is episode: {movie.titleType.isEpisode ? "yes" : "no"}</p>
+                        <p>Is series: {movie.titleType.isSeries ? "yes" : "no"}</p>
                       </CardContent>
                       <CardFooter>
                         <p>Card Footer</p>
