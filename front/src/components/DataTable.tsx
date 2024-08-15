@@ -21,9 +21,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -34,11 +31,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { NewChatDialog } from "./dialogs/NewChatDialog";
-import { useGlobalChatsContext } from "@/context/globalChatContext";
 import { DialogDemo } from "@/app/page";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { useGlobalChatsContext } from "@/context/globalChatContext";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -66,14 +61,12 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "id",
     header: "Id",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
+    cell: ({ row }) => <div>{row.getValue("id")}</div>,
   },
   {
     accessorKey: "title",
     header: "Title",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original.originalTitleText.text}</div>
-    ),
+    cell: ({ row }) => <div>{row.original.originalTitleText.text}</div>,
   },
   {
     accessorKey: "releaseYear.year",
@@ -87,27 +80,21 @@ export const columns: ColumnDef<any>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original.releaseYear.year}</div>
-    ),
+    cell: ({ row }) => <div>{row.original.releaseYear.year}</div>,
     sortingFn: "basic",
   },
   {
     accessorKey: "Is series",
     header: "Is series",
     cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.titleType.isSeries ? `Yes` : "No"}
-      </div>
+      <div>{row.original.titleType.isSeries ? `Yes` : "No"}</div>
     ),
   },
   {
     accessorKey: "Is episode",
     header: "Is episode",
     cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.titleType.isEpisode ? `Yes` : "No"}
-      </div>
+      <div>{row.original.titleType.isEpisode ? `Yes` : "No"}</div>
     ),
   },
   {
@@ -128,6 +115,7 @@ export function DataTableDemo({ data }: any) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const { movies, setMovies } = useGlobalChatsContext();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -151,6 +139,23 @@ export function DataTableDemo({ data }: any) {
     },
   });
 
+  const titleFilterOnChange = async (value: any) => {
+    setTitle(value.target.value);
+    if (value.target.value === "") {
+      const response = await fetch(`/api/get-all-chats?page=1`, {
+        method: "GET",
+      });
+      const allMovies = await response.json();
+      setMovies(allMovies);
+    } else {
+      const response = await fetch(
+        `/api/find-title?title=${value.target.value}`
+      );
+      const filteredMovies = await response.json();
+      setMovies(filteredMovies);
+    }
+  };
+
   return (
     <div className="w-full mx-2">
       <div className="flex justify-between items-center">
@@ -159,9 +164,8 @@ export function DataTableDemo({ data }: any) {
             id="title"
             value={title}
             placeholder="Title"
-            onChange={(value) => setTitle(value.target.value)}
+            onChange={titleFilterOnChange}
           />
-          <Button type="submit">Search</Button>
         </div>
         <div className="py-4">
           <DropdownMenu>
@@ -178,7 +182,6 @@ export function DataTableDemo({ data }: any) {
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      className="capitalize"
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
