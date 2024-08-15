@@ -37,6 +37,8 @@ import {
 import { NewChatDialog } from "./dialogs/NewChatDialog";
 import { useGlobalChatsContext } from "@/context/globalChatContext";
 import { DialogDemo } from "@/app/page";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -74,7 +76,24 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
-    accessorKey: "isseries",
+    accessorKey: "releaseYear.year",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="pl-0"
+      >
+        Year
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original.releaseYear.year}</div>
+    ),
+    sortingFn: "basic",
+  },
+  {
+    accessorKey: "Is series",
     header: "Is series",
     cell: ({ row }) => (
       <div className="capitalize">
@@ -83,7 +102,7 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
-    accessorKey: "isepisode",
+    accessorKey: "Is episode",
     header: "Is episode",
     cell: ({ row }) => (
       <div className="capitalize">
@@ -98,47 +117,10 @@ export const columns: ColumnDef<any>[] = [
     cell: ({ row }) => {
       const Chat = row.original;
 
-      return <DropDownMenuComponent chat={Chat} />;
+      return <DialogDemo movieId={Chat.id} />;
     },
   },
 ];
-
-const DropDownMenuComponent = ({ chat }: any) => {
-  const handleDelete = async () => {
-    // await fetch(`/api/delete-chat?id=${chat.id}`, {
-    //   method: "DELETE",
-    // });
-    // const response = await fetch("/api/get-all-chats", {
-    //   method: "GET",
-    // });
-    // setChats(await response.json());
-  };
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem
-          onClick={() => navigator.clipboard.writeText(chat.id)}
-        >
-          Copy Chat Id
-        </DropdownMenuItem>
-        <DropdownMenuItem>See Metrics</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <DialogDemo movieId={chat.id} />
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDelete}>Delete Chat</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
 
 export function DataTableDemo({ data }: any) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -170,6 +152,44 @@ export function DataTableDemo({ data }: any) {
 
   return (
     <div className="w-full mx-2">
+      <div className="flex justify-between items-center">
+        <div>
+          <Input
+            id="title"
+            value={""}
+            placeholder="Title"
+            // onChange={(value) => setTitle(value.target.value)}
+          />
+        </div>
+        <div className="py-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
       <div className="rounded-md border min-h-[700px]">
         <Table>
           <TableHeader>

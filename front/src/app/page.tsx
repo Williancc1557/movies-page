@@ -75,11 +75,6 @@ export default function Home() {
     <main className="flex flex-col h-screen">
       <Header />
       <div className="m-10">
-        <p className="mb-2">Filters:</p>
-        <div className="flex w-60 gap-4 flex-col">
-          <Input type="text" placeholder="Year" />
-          <Input type="text" placeholder="Year" />
-        </div>
         {loading ? (
           <div className="w-full flex justify-center h-96">
             <CircularProgress className="m-auto h-96 w-full" size={80} />
@@ -164,8 +159,12 @@ export function DialogDemo({ movieId }: any) {
 
   return (
     <Dialog defaultOpen={open} onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild onClick={() => setOpen(!open)}>
-        <p>Edit data</p>
+      <DialogTrigger
+        asChild
+        onClick={() => setOpen(!open)}
+        className="cursor-pointer"
+      >
+        <Edit />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -204,7 +203,7 @@ export function DialogDemo({ movieId }: any) {
             <Input
               id="endyear"
               className="col-span-3"
-              value={endYear}
+              value={endYear || ""}
               onChange={(e) => setEndYear(e.target.value)}
             />
           </div>
