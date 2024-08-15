@@ -8,7 +8,7 @@ export const Header = () => {
     <nav className="flex justify-between pt-4 pb-4 align-middle font-bossa-regular border-b border-[#ffffff23]">
       <div className="flex items-center h-full">
         <span className="mx-10 text-xl font-semibold">
-          <button>FILMS EDITOR</button>
+          <button>MOVIES EDITOR</button>
         </span>
         <div className="flex h-full gap-6 items-center [&_li]:h-full [&_li]:flex hover:[&_li_button]:text-blue-600 justify-center">
           <li className="h-full flex">

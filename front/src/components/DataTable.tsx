@@ -26,7 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -36,10 +35,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NewChatDialog } from "./dialogs/NewChatDialog";
-import { Chat } from "@/models/chat";
 import { useGlobalChatsContext } from "@/context/globalChatContext";
+import { DialogDemo } from "@/app/page";
 
-export const columns: ColumnDef<Chat>[] = [
+export const columns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -68,20 +67,28 @@ export const columns: ColumnDef<Chat>[] = [
     cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "createdAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created At
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    accessorKey: "title",
+    header: "Title",
     cell: ({ row }) => (
-      <div className="lowercase ml-4">{row.getValue("createdAt")}</div>
+      <div className="capitalize">{row.original.originalTitleText.text}</div>
+    ),
+  },
+  {
+    accessorKey: "isseries",
+    header: "Is series",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.original.titleType.isSeries ? `Yes` : "No"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "isepisode",
+    header: "Is episode",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.original.titleType.isSeries ? `Yes` : "No"}
+      </div>
     ),
   },
   {
@@ -96,23 +103,15 @@ export const columns: ColumnDef<Chat>[] = [
   },
 ];
 
-interface DropDownMenuProps {
-  chat: Chat;
-}
-
-const DropDownMenuComponent = ({ chat }: DropDownMenuProps) => {
-  const { setChats } = useGlobalChatsContext();
-
+const DropDownMenuComponent = ({ chat }: any) => {
   const handleDelete = async () => {
-    await fetch(`/api/delete-chat?id=${chat.id}`, {
-      method: "DELETE",
-    });
-
-    const response = await fetch("/api/get-all-chats", {
-      method: "GET",
-    });
-
-    setChats(await response.json());
+    // await fetch(`/api/delete-chat?id=${chat.id}`, {
+    //   method: "DELETE",
+    // });
+    // const response = await fetch("/api/get-all-chats", {
+    //   method: "GET",
+    // });
+    // setChats(await response.json());
   };
 
   return (
@@ -132,18 +131,16 @@ const DropDownMenuComponent = ({ chat }: DropDownMenuProps) => {
         </DropdownMenuItem>
         <DropdownMenuItem>See Metrics</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Edit Chat</DropdownMenuItem>
+        <DropdownMenuItem>
+          <DialogDemo movieId={chat.id} />
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleDelete}>Delete Chat</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-interface Props {
-  data: Chat[];
-}
-
-export function DataTableDemo({ data }: Props) {
+export function DataTableDemo({ data }: any) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -153,7 +150,7 @@ export function DataTableDemo({ data }: Props) {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: data.results,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -173,37 +170,6 @@ export function DataTableDemo({ data }: Props) {
 
   return (
     <div className="w-full mx-2">
-      <div className="flex justify-between items-center">
-        <div className="py-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <NewChatDialog />
-      </div>
       <div className="rounded-md border min-h-[700px]">
         <Table>
           <TableHeader>
@@ -258,24 +224,6 @@ export function DataTableDemo({ data }: Props) {
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
         </div>
       </div>
     </div>
