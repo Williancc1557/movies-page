@@ -71,11 +71,11 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "genres",
     header: "Genre",
-    cell: ({ row }) => (
-      <div>
-        {(row.getValue("genres") as any)?.map((value: any) => value + ", ")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      return (
+        <div>{row.original.genres?.map((value: any) => value + ", ")}</div>
+      );
+    },
   },
   {
     accessorKey: "releaseYear.year",

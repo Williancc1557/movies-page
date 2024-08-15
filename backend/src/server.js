@@ -35,6 +35,7 @@ app.get("/movies/filter", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const titleQuery = req.query.title ? req.query.title.toLowerCase() : "";
   const genreQuery = req.query.genre ? req.query.genre.toLowerCase() : "";
+  const yearQuery = req.query.year || "";
 
   const filteredMovies = movies.filter((movie) => {
     const matchesTitle = movie.originalTitleText.text
@@ -44,7 +45,11 @@ app.get("/movies/filter", async (req, res) => {
       ? movie.genres.some((genre) => genre.toLowerCase().includes(genreQuery))
       : true;
 
-    return matchesTitle && matchesGenre;
+    const matchesYear = yearQuery
+      ? parseInt(yearQuery) === movie.releaseYear.year
+      : true;
+
+    return matchesTitle && matchesGenre && matchesYear;
   });
 
   const totalResults = filteredMovies.length;
