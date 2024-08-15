@@ -3,22 +3,43 @@
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [movies, setMovies] = useState({} as any);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api/get-all-chats?a=b", {
+      setLoading(true)
+      const response = await fetch(`/api/get-all-chats?page=${page}`, {
         method: "GET",
       });
       setMovies(await response.json());
+
+      setLoading(false)
     };
 
     fetchData();
-  }, [setMovies]);
+  }, [page]);
+
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(Number.parseInt(page as any) - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+      setPage(Number.parseInt(page as any) + 1);
+  };
+
+  const handlePageSelect = (pageNumber: number) => {
+    setPage(pageNumber);
+  };
 
   console.log(movies)
 
@@ -46,7 +67,7 @@ export default function Home() {
                         <p>Is series: {movie.titleType.isSeries ? "yes" : "no"}</p>
                       </CardContent>
                       <CardFooter>
-                        <p>Card Footer</p>
+                        <p>{movie.releaseYear.endYear ? "The end year is " + movie.releaseYear.endYear : "No end year"}</p>
                       </CardFooter>
                     </Card>
                   </div>
@@ -54,6 +75,30 @@ export default function Home() {
               }
             </div>
           </div>
+          <Pagination className="mt-5 mb-5">
+            {loading ? "Loading" :
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious onClick={handlePreviousPage} />
+              </PaginationItem>
+
+              {[movies.page, Number.parseInt(movies.page) + 1].map((element, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink 
+                    isActive={page == element}
+                    onClick={() => handlePageSelect(element)}
+                  >
+                    {element}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext onClick={handleNextPage} />
+              </PaginationItem>
+            </PaginationContent>
+            }
+          </Pagination>
         </div>
     </main>
   );
