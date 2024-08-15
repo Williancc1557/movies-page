@@ -76,13 +76,13 @@ export default function Home() {
       <Header />
       <div className="m-10">
         {loading ? (
-          <div className="w-full flex justify-center h-96">
+          <div className="w-full flex justify-center h-[85vh]">
             <CircularProgress className="m-auto h-96 w-full" size={80} />
           </div>
         ) : (
           <>
             <DataTableDemo data={movies} />
-            <Pagination className="mt-5 mb-5">
+            <Pagination className="mt-5 mb-5 relative top-[-60px]">
               {loading ? (
                 "Loading"
               ) : (
@@ -197,14 +197,14 @@ export function DialogDemo({ movieId }: any) {
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="endyear" className="text-right">
-              End year
+            <Label htmlFor="year" className="text-right">
+              Year
             </Label>
             <Input
-              id="endyear"
+              id="year"
               className="col-span-3"
-              value={endYear || ""}
-              onChange={(e) => setEndYear(e.target.value)}
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
             />
           </div>
         </div>

@@ -124,6 +124,7 @@ export const columns: ColumnDef<any>[] = [
 
 export function DataTableDemo({ data }: any) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [title, setTitle] = React.useState("");
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -156,9 +157,9 @@ export function DataTableDemo({ data }: any) {
         <div className="flex gap-5">
           <Input
             id="title"
-            value={""}
+            value={title}
             placeholder="Title"
-            // onChange={(value) => setTitle(value.target.value)}
+            onChange={(value) => setTitle(value.target.value)}
           />
           <Button type="submit">Search</Button>
         </div>
