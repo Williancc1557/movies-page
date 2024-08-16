@@ -23,8 +23,10 @@ export async function GET(request: NextRequest) {
   }
 
   const response = await fetch(
-    `http://localhost:8080/movies/filter?${queryParams.toString()}`
+    `https://testb-nf4udowr6q-uc.a.run.app/movies/filter?${queryParams.toString()}`
   );
+
+  console.log(response);
 
   return new Response(JSON.stringify(await response.json()), {
     status: response.status,

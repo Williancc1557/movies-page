@@ -2,6 +2,16 @@
 
 import * as React from "react";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
@@ -13,7 +23,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Edit, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,9 +41,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DialogDemo } from "@/app/page";
 import { Input } from "./ui/input";
 import { useGlobalChatsContext } from "@/context/globalChatContext";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -318,5 +328,149 @@ export function DataTableDemo({ data }: any) {
         </div>
       </div>
     </div>
+  );
+}
+
+export function DialogDemo({ movieId }: any) {
+  const { movies, setMovies } = useGlobalChatsContext();
+  const movie = movies?.results?.find((item: any) => item.id === movieId);
+  const [title, setTitle] = React.useState(movie?.originalTitleText?.text);
+  const [year, setYear] = React.useState(movie.releaseYear.year);
+  const [open, setOpen] = React.useState(false);
+  const [isSeries, setIsSeries] = React.useState(movie.titleType.isSeries);
+  const [isEpisode, setIsEpisode] = React.useState(movie.titleType.isEpisode);
+
+  const submit = () => {
+    const index = movies?.results?.findIndex((el: any) => el.id == movieId);
+
+    if (index == -1) return setOpen(false);
+
+    const updatedMovies = {
+      ...movies,
+      results: movies.results.map((movie: any, i: number) => {
+        if (i === index) {
+          const updatedValue = {
+            ...movie,
+            originalTitleText: { ...movie.originalTitleText, text: title },
+            releaseYear: { ...movie.releaseYear, year },
+            titleType: {
+              isEpisode,
+              isSeries,
+            },
+          };
+          const moviesStore = localStorage.getItem("movies");
+          if (moviesStore) {
+            const moviesStoreJson = JSON.parse(moviesStore);
+            const i = moviesStoreJson.findIndex((v: any) => v.id == movie.id);
+
+            if (i == -1) {
+              moviesStoreJson.push(updatedValue);
+            } else {
+              moviesStoreJson[i] = updatedValue;
+            }
+
+            localStorage.setItem("movies", JSON.stringify(moviesStoreJson));
+            return updatedValue;
+          }
+
+          localStorage.setItem("movies", JSON.stringify([updatedValue]));
+
+          return updatedValue;
+        }
+
+        return movie;
+      }),
+    };
+
+    setMovies(updatedMovies);
+
+    setOpen(false);
+  };
+
+  return (
+    <Dialog defaultOpen={open} onOpenChange={setOpen} open={open}>
+      <DialogTrigger
+        asChild
+        onClick={() => setOpen(!open)}
+        className="cursor-pointer"
+      >
+        <Edit />
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit movie</DialogTitle>
+          <DialogDescription>
+            Make changes to your movie here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="title" className="text-right">
+              Title
+            </Label>
+            <Input
+              id="title"
+              value={title}
+              className="col-span-3"
+              onChange={(value) => setTitle(value.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="year" className="text-right">
+              Year
+            </Label>
+            <Input
+              id="year"
+              className="col-span-3"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="year" className="text-right">
+              Is series
+            </Label>
+            <RadioGroup
+              value={isSeries ? "yes" : "no"}
+              onValueChange={(value: string) => setIsSeries(value === "yes")}
+              className="flex"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="r1" />
+                <Label htmlFor="r1">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="r2" />
+                <Label htmlFor="r2">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="year" className="text-right">
+              Is episode
+            </Label>
+            <RadioGroup
+              value={isEpisode ? "yes" : "no"}
+              onValueChange={(value: string) => setIsEpisode(value === "yes")}
+              className="flex"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="r1" />
+                <Label htmlFor="r1">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="r2" />
+                <Label htmlFor="r2">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" onClick={submit}>
+            Save changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
